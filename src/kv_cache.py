@@ -14,4 +14,31 @@ class KVCache:
 
 # Attention sinks.
 class SlidingKV:
-    pass
+    def __init__(self, window, sink: int = 0):
+        self.window = window
+        self.sink = sink
+        self.k = None
+        self.v = None
+    
+    def step(self, k_new: torch.Tensor, v_new: torch.Tensor):
+        if self.k is None:
+            self.k = k_new
+            self.v = v_new
+        else:
+            self.k = torch.cat([self.k, k_new], dim = 2)
+            self.v = torch.cat([self.v, v_new], dim = 2)
+
+        # (B, n_heads, seq_len, d_head)
+        # Clipping
+        if self.k.size(2) > self.window:
+            sink_k = self.k[:, :, :self.sink, :]
+            sink_v = self.v[:, :, :self.sink, :]
+            recent_k = self.k[:, :, -self.window:, :]
+            recent_v = self.v[:, :, -self.window:, :]
+            self.k = torch.cat([sink_k, recent_k], dim = 2)
+            self.v = torch.cat([sink_v, recent_v], dim = 2)
+
+        return self.k, self.v
+
+
+
