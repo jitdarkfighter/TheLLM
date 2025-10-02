@@ -22,10 +22,16 @@ Papers
 - Mixture of Experts (Switch Transformer)
 - Modern normalization like RMSNorm (RMSNorm, PreNorm vs PostNorm - On layer norm in the trans. arch)
 - Gated FFN, SwiGLU (Switch Transformer)
-- KV cache (Transformer-XL, ARTICLES)
+- KV cache (Transformer-XL, ARTICLES) - Inference only. (Sliding KV cache.)
 - Reference: https://arxiv.org/abs/2002.05202 (GLU paper)
 - Reference: https://arxiv.org/abs/1710.05941 (SiLU paper)
 
 For later Papers
 - LLaMA / LLaMA 2 → KV cache + RMSNorm
 - Mistral → Sliding window + FlashAttention
+
+
+Before going public
+- Support checkpointing / resume training.
+- Support mixed-precision / AMP for GPU efficiency.
+- Add config-driven architecture → easily switch #layers, #heads, d_model, etc.

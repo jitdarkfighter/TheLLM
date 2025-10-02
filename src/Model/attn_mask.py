@@ -1,6 +1,6 @@
 import torch
 
-def casual_mask(T: int, device=None):
+def causal_mask(T: int, device=None):
     """
     So using a boolean matrix, it sets the values in the actual matrix as -inf (which will become 0 because of softmax) wherever the boolean is True.
     """

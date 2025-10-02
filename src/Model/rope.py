@@ -18,7 +18,7 @@ class RoPECache:
         self.max_pos = max_pos
         self.base = base
         self.device = device
-        self.build = _build(max_pos)
+        self._build(max_pos)
 
     
     def _build(self, max_pos: int):
@@ -38,11 +38,23 @@ class RoPECache:
         req = int(positions.max().item()) + 1 if positions.numel() > 0 else 1
 
         if req > self.max_pos:
-            self._build = (max(req, int(self.max_pos * 2)))
+            self._build(max(req, int(self.max_pos * 2)))
 
         cos = self.cos[positions] # (T, d_head/2)
         sin = self.sin[positions] # (T, d_head/2)   
 
         return cos, sin
 
+
+def apply_rope_single(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:
+    """x: (B, H, T, D), cos/sin: (T, D/2)"""
+    # RoPE rotation
+    x1, x2 = x[..., ::2], x[..., 1::2]  # (B,H,T,D/2)
+    x_rotated = torch.stack([-x2, x1], dim=-1).reshape_as(x)  # (B,H,T,D)
+    
+    # Expand cos and sin to match x shape: (T, D/2) -> (1, 1, T, D/2) -> (1, 1, T, D)
+    cos_expanded = torch.cat([cos, cos], dim=-1).unsqueeze(0).unsqueeze(0)  # (1, 1, T, D)
+    sin_expanded = torch.cat([sin, sin], dim=-1).unsqueeze(0).unsqueeze(0)  # (1, 1, T, D)
+    
+    return x * cos_expanded + x_rotated * sin_expanded
 
