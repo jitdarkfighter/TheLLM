@@ -43,8 +43,9 @@ class TransformerBlock(nn.Module):
         """
         super().__init__()
         self.ln1 = RMSNorm(d_model)
-        self.attention = SlidingWindowAttention(d_model, n_head, dropout, max_pos, sliding_window,
-                                                attention_sink, n_kv_head, device)
+        self.attention = SlidingWindowAttention(d_model = d_model, n_head = n_head, dropout = dropout, max_pos = max_pos, 
+                                                sliding_window = sliding_window, attention_sink = attention_sink, n_kv_head = n_kv_head, 
+                                                device = device)
         self.ln2 = RMSNorm(d_model)
         self.ffn = SwiGLU(d_model, hidden_dim_factor = 4,  dropout = dropout)
 

@@ -6,6 +6,8 @@
 
 # RoPECache -> Precompute the cos and sin matrices for a max sequence length and store them. Otherwise compute and memory will explode.
 
+# According to RoFormer paper, theta = 10000^(-2i/d)
+
 import torch
 import math
 import torch.nn as nn
@@ -40,8 +42,8 @@ class RoPECache:
         if req > self.max_pos:
             self._build(max(req, int(self.max_pos * 2)))
 
-        cos = self.cos[positions] # (T, d_head/2)
-        sin = self.sin[positions] # (T, d_head/2)   
+        cos = self.cos[positions].to(positions.device) # (T, d_head/2)
+        sin = self.sin[positions].to(positions.device) # (T, d_head/2)   
 
         return cos, sin
 

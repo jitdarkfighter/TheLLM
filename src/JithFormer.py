@@ -55,7 +55,7 @@ class JithFormer(nn.Module):
             idx_cond = idx[:, -self.block_size:]  if kv_cache_list[0] is None else idx[:, -1:]  # crop context if needed
 
             # absolute start position from cache length(0 on the first step)
-            start_pos = 0 if kv_cache_list[0] is None else kv_cache_list[0].shape[2]
+            start_pos = 0 if kv_cache_list[0] is None else kv_cache_list[0].k.shape[2]
 
             logits, _, kv_cache_list = self(idx = idx_cond, targets = None, kv_cache_list = kv_cache_list, start_pos = start_pos)
 

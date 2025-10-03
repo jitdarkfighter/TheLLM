@@ -12,6 +12,24 @@ Aim
 - RLHF with PPO or GRPO
 - Have good evaluation benchmarks
 - Inference Efficency (For later, QloRA and stuff)
+- Automatic Mixed Precision - https://docs.pytorch.org/docs/stable/amp.html
+
+Todo
+- Implement a better tokenizer
+- Check configs
+- Get more data and train on kaggle. it is better to have x20 number of parameters of tokens.
+- Check if inference is working properly
+- Check training script
+
+Something is wrong with 0 temperature
+Generation config: {'max_new_tokens': 100, 'temperature': 0.0, 'top_k': 10, 'top_p': None, 'eos_token': 1}
+
+Prompt: 'movement limited by their Action Gauge . Up to nine'
+Generating...
+
+==================================================
+Prompt: 'movement limited by their Action Gauge . Up to nine'
+Generated: '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 
 Papers 

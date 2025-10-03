@@ -6,14 +6,14 @@ from src.Model.rope import RoPECache, apply_rope_single
 from src.Model.kv_cache import KVCache  # your existing class
 
 class SlidingWindowAttention(nn.Module):
-    def __init__(self, n_embd: int, n_head: int, dropout: float = 0.0, max_pos: int = 4096,
+    def __init__(self, d_model: int, n_head: int, dropout: float = 0.0, max_pos: int = 4096,
                  sliding_window: int | None = None, attention_sink: int = 0, n_kv_head: int | None = None, 
                  device: torch.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')):
         """
         Sliding window attention mechanism with RoPE and kv cache with attention sink.
 
         Args:
-            n_embd: embedding dimension
+            d_model: embedding dimension
             n_head: number of attention heads
             dropout: dropout rate
             max_pos: maximum position for RoPE
@@ -23,18 +23,18 @@ class SlidingWindowAttention(nn.Module):
             device: device to run the model on
         """
         super().__init__()
-        assert n_embd % n_head == 0, "n_embd must be divisible by n_head"
+        assert d_model % n_head == 0, "d_model must be divisible by n_head"
         self.n_head = n_head
         self.n_kv_head = n_kv_head or n_head
         assert self.n_head % self.n_kv_head == 0, "n_head must be multiple of n_kv_head (GQA grouping)"
         self.group_size = self.n_head // self.n_kv_head
-        self.d_head = n_embd // n_head
+        self.d_head = d_model // n_head
 
         # Separate projections for Q vs K/V (sizes differ under GQA)
-        self.wq  = nn.Linear(n_embd, self.n_head   * self.d_head, bias=False)
-        self.wk  = nn.Linear(n_embd, self.n_kv_head * self.d_head, bias=False)
-        self.wv  = nn.Linear(n_embd, self.n_kv_head * self.d_head, bias=False)
-        self.proj = nn.Linear(n_embd, n_embd, bias=False)
+        self.wq  = nn.Linear(d_model, self.n_head   * self.d_head, bias=False)
+        self.wk  = nn.Linear(d_model, self.n_kv_head * self.d_head, bias=False)
+        self.wv  = nn.Linear(d_model, self.n_kv_head * self.d_head, bias=False)
+        self.proj = nn.Linear(d_model, d_model, bias=False)
         self.dropout = nn.Dropout(dropout)
 
         self.rope_cache: RoPECache | None = None
@@ -67,7 +67,7 @@ class SlidingWindowAttention(nn.Module):
         else:
             k_all, v_all = k, v
 
-        # Sliding-window + attention-sink (crop along seq length)
+        # sliding-window + attention-sink 
         if self.sliding_window is not None and k_all.size(2) > (self.sliding_window + self.attention_sink):
             s = self.attention_sink
             k_all = torch.cat([k_all[:, :, :s, :], k_all[:, :, -self.sliding_window:, :]], dim=2)
@@ -81,7 +81,7 @@ class SlidingWindowAttention(nn.Module):
             k_attn, v_attn = k_all, v_all
 
         # Scaled dot-product attention (PyTorch scales internally)
-        is_causal = kv_cache is None
+        is_causal = True
         y = F.scaled_dot_product_attention(q, k_attn, v_attn,
                                            attn_mask=None,
                                            dropout_p=self.dropout.p if self.training else 0.0,
