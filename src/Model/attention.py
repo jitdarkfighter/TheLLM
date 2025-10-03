@@ -80,8 +80,9 @@ class SlidingWindowAttention(nn.Module):
         else:
             k_attn, v_attn = k_all, v_all
 
+        # no masking for inference.
+        is_causal = kv_cache is None
         # Scaled dot-product attention (PyTorch scales internally)
-        is_causal = True
         y = F.scaled_dot_product_attention(q, k_attn, v_attn,
                                            attn_mask=None,
                                            dropout_p=self.dropout.p if self.training else 0.0,

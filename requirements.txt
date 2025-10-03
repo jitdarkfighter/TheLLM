@@ -2,5 +2,5 @@ torch>=2.0.0
 tensorboard>=2.14.0
 numpy>=1.24.0
 tqdm>=4.65.0
-dotenv
+python-dotenv>=1.0.0
 datasets

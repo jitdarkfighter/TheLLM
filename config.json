@@ -6,8 +6,8 @@
     "d_model": 128,
     "dropout": 0.1,
     "max_pos": 4096,
-    "sliding_window": null,
-    "attention_sink": 0,
+    "sliding_window": 256,
+    "attention_sink": 4,
     "n_kv_head": null,
     "n_layer": 2
   },
@@ -26,8 +26,8 @@
     "compile": false
   },
   "generation_config": {
-    "max_new_tokens": 200,
-    "temperature": 1.0,
+    "max_new_tokens": 100,
+    "temperature": 0.5,
     "top_k": 10,
     "top_p": null,
     "eos_token": 1

@@ -23,6 +23,11 @@ os.makedirs('models', exist_ok=True)
 with open('config.json', 'r') as f:
     config = json.load(f)
 model_config = config['model_config']
+
+# Attention sink and sliding window should be None for training
+model_config['sliding_window'] = None
+model_config['attention_sink'] = 0
+
 training_config = config['training_config']
 paths_config = config['paths']
 EPOCHS = 5 
@@ -75,7 +80,7 @@ train_texts = [text for text in dataset['train']['text'] if text.strip()]
 val_texts = [text for text in dataset['validation']['text'] if text.strip()]
 
 # Take only 1/100 of the training and validation data
-quarter_train_size = len(train_texts) // 50
+quarter_train_size = len(train_texts) // 10
 quarter_val_size = len(val_texts) // 50
 train_texts = train_texts[:quarter_train_size]
 val_texts = val_texts[:quarter_val_size]
@@ -127,7 +132,7 @@ for epoch in range(EPOCHS):
     avg_epoch_loss = epoch_loss / num_batches if num_batches > 0 else 0
     print(f"End of Epoch {epoch+1}, Average Loss: {avg_epoch_loss:.4f}")
     
-    # # Validation
+    # Validation
     model.eval()
     val_loss = 0.0
     val_batches = 0
@@ -142,7 +147,6 @@ for epoch in range(EPOCHS):
     print(f"Validation Loss: {avg_val_loss:.4f}")
     
     # Save best model
-
     torch.save({
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),

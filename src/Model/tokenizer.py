@@ -4,7 +4,7 @@ from tokenizers import ByteLevelBPETokenizer, Tokenizer
 
 class ByteTokenizer:
     def __init__(self):
-        self.eos_token_id = 1 # Using 0 as EOS token
+        self.eos_token_id = 1
     
     def encode(self, str) -> torch.Tensor:
         return torch.tensor(list(str.encode('utf-8')), dtype=torch.long)

@@ -4,6 +4,7 @@ Quick test script to verify model initialization and basic functionality
 
 import torch
 import json
+
 from src.JithFormer import JithFormer
 from src.Model.tokenizer import ByteTokenizer
     
@@ -36,7 +37,7 @@ print(f"Logits shape: {logits.shape}")
 print(f"Loss: {loss.item():.4f}")
 
 # Test generation
-print("Testing generation...")
+print("Testing generation")
 tokenizer = ByteTokenizer()
 prompt = "Hello"
 prompt_tokens = tokenizer.encode(prompt).unsqueeze(0)

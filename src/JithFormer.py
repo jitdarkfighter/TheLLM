@@ -45,11 +45,15 @@ class JithFormer(nn.Module):
 
     @torch.no_grad()
     def generate(self, prompt: torch.Tensor, max_new_tokens: int = 200, temperature: float = 1.0, top_k: int = 10,
-                 top_p: float | None = None, eos_token: int = 1, sliding_window: int | None = None, attention_sink: int = 0):
-        
-
+                 top_p: float | None = None, eos_token: int = 1):
+        """
+        Generate text from a prompt.
+        Note: sliding_window and attention_sink are configured at model initialization
+        and are automatically applied by the attention layers during generation.
+        """
         self.eval()
         idx = prompt
+
         kv_cache_list = [None] * len(self.layers)  # Initialize kv_cache for each layer
         for _ in range(max_new_tokens):
             idx_cond = idx[:, -self.block_size:]  if kv_cache_list[0] is None else idx[:, -1:]  # crop context if needed
@@ -59,9 +63,16 @@ class JithFormer(nn.Module):
 
             logits, _, kv_cache_list = self(idx = idx_cond, targets = None, kv_cache_list = kv_cache_list, start_pos = start_pos)
 
-            next_logits = logits[:, -1, :] / temperature
-            probs = F.softmax(next_logits, dim=-1)  # (B, vocab_size)
-            next_id = torch.argmax(probs, dim=-1, keepdim=True) if temperature == 0.0 else torch.multinomial(probs, num_samples=1)  # (B, 1)
+            next_logits = logits[:, -1, :]  # (B, vocab_size)
+            
+            # Handle temperature == 0.0 case 
+            if temperature == 0.0:
+                next_id = torch.argmax(next_logits, dim=-1, keepdim=True)  # (B, 1)
+            else:
+                next_logits = next_logits / temperature
+                probs = F.softmax(next_logits, dim=-1)  # (B, vocab_size)
+                next_id = torch.multinomial(probs, num_samples=1)  # (B, 1)
+            
             idx = torch.cat((idx, next_id), dim=1)  # append to the sequence
 
             if eos_token is not None and next_id.item() == eos_token:
